@@ -1,0 +1,92 @@
+-- ============================================================
+-- CASE 1: CUSTOMER BEHAVIOR ANALYSIS
+-- How much does each customer spend? (CLV)
+-- Which customers are most valuable?
+-- ============================================================
+
+-- STEP 4: Raw CLV table — total spending per customer
+-- Joins 3 tables: customers → orders → payments
+SELECT
+  c.customer_unique_id,
+  COUNT(DISTINCT o.order_id) AS total_orders,
+  SUM(p.payment_value) AS total_spent
+FROM Olist.olist_customers_dataset AS c
+JOIN Olist.olist_orders_dataset AS o
+  ON c.customer_id = o.customer_id
+JOIN Olist.olist_order_payments_dataset AS p
+  ON o.order_id = p.order_id
+GROUP BY c.customer_unique_id
+ORDER BY total_spent DESC;
+-- This is the raw CLV table: how many orders each customer placed
+-- and how much they spent in total. Valuable data, but not yet a KPI.
+
+-- STEP 5: First KPI — Average Customer Lifetime Value
+-- Outer query takes the average of each customer's total spend
+SELECT
+  AVG(total_spent) AS avg_customer_lifetime_value
+FROM (
+  SELECT
+    c.customer_unique_id,
+    SUM(p.payment_value) AS total_spent
+  FROM Olist.olist_customers_dataset AS c
+  JOIN Olist.olist_orders_dataset AS o
+    ON c.customer_id = o.customer_id
+  JOIN Olist.olist_order_payments_dataset AS p
+    ON o.order_id = p.order_id
+  GROUP BY c.customer_unique_id
+);
+-- avg_customer_lifetime_value ≈ 166.6
+-- On average, a customer spends ~166 BRL across their entire relationship
+-- with the platform
+
+-- STEP 6: Customer segmentation by spending level
+SELECT
+  customer_segment,
+  COUNT(*) AS customer_count
+FROM (
+  SELECT
+    c.customer_unique_id,
+    SUM(p.payment_value) AS total_spent,
+    CASE
+      WHEN SUM(p.payment_value) < 100 THEN 'Low Value Customer'
+      WHEN SUM(p.payment_value) BETWEEN 100 AND 500 THEN 'Mid Value Customer'
+      ELSE 'High Value Customer'
+    END AS customer_segment
+  FROM Olist.olist_customers_dataset AS c
+  JOIN Olist.olist_orders_dataset AS o
+    ON c.customer_id = o.customer_id
+  JOIN Olist.olist_order_payments_dataset AS p
+    ON o.order_id = p.order_id
+  GROUP BY c.customer_unique_id
+)
+GROUP BY customer_segment
+ORDER BY customer_count DESC;
+-- Low Value: ~46% | Mid Value: ~49% | High Value: ~5%
+
+-- STEP 7: Revenue contribution by segment
+-- Which segment drives the most revenue?
+SELECT
+  customer_segment,
+  COUNT(*) AS customer_count,
+  SUM(total_spent) AS segment_revenue
+FROM (
+  SELECT
+    c.customer_unique_id,
+    SUM(p.payment_value) AS total_spent,
+    CASE
+      WHEN SUM(p.payment_value) < 100 THEN 'Low Value Customer'
+      WHEN SUM(p.payment_value) BETWEEN 100 AND 500 THEN 'Mid Value Customer'
+      ELSE 'High Value Customer'
+    END AS customer_segment
+  FROM Olist.olist_customers_dataset AS c
+  JOIN Olist.olist_orders_dataset AS o
+    ON c.customer_id = o.customer_id
+  JOIN Olist.olist_order_payments_dataset AS p
+    ON o.order_id = p.order_id
+  GROUP BY c.customer_unique_id
+)
+GROUP BY customer_segment
+ORDER BY segment_revenue DESC;
+-- Mid Value: ~9.15M (57%) | High Value: ~4.17M (26%) | Low Value: ~2.68M (17%)
+-- High Value customers are only 5% of the base but generate 26% of revenue
+-- Mid Value customers are the platform's main revenue engine
