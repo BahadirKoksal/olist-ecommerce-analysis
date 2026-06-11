@@ -1,0 +1,41 @@
+-- ============================================================
+-- CASE 2: PRODUCT PERFORMANCE ANALYSIS
+-- Which categories have the highest customer satisfaction?
+-- ============================================================
+
+-- STEP 3: Average review score by category (all categories)
+-- Joins 3 tables: order_items → products → reviews
+SELECT
+  p.product_category_name,
+  AVG(r.review_score) AS avg_review_score,
+  COUNT(oi.product_id) AS total_sales
+FROM Olist.olist_order_items_dataset AS oi
+JOIN Olist.olist_products_dataset AS p
+  ON oi.product_id = p.product_id
+JOIN Olist.olist_order_reviews_dataset AS r
+  ON oi.order_id = r.order_id
+GROUP BY p.product_category_name
+ORDER BY avg_review_score DESC
+LIMIT 10;
+-- Warning: small sample sizes can distort averages
+-- cds_dvds_musicals: 4.64 score but only 14 sales — not a reliable insight
+-- Sample size matters in data analysis
+
+-- STEP 4: Best reviewed categories — filtered by minimum sales volume
+-- HAVING filters after GROUP BY (unlike WHERE which filters before)
+-- Only include categories with more than 1,000 sales for reliability
+SELECT
+  p.product_category_name,
+  AVG(r.review_score) AS avg_review_score,
+  COUNT(oi.product_id) AS total_sales
+FROM Olist.olist_order_items_dataset AS oi
+JOIN Olist.olist_products_dataset AS p
+  ON oi.product_id = p.product_id
+JOIN Olist.olist_order_reviews_dataset AS r
+  ON oi.order_id = r.order_id
+GROUP BY p.product_category_name
+HAVING COUNT(oi.product_id) > 1000
+ORDER BY avg_review_score DESC;
+-- Reliable top categories: malas_acessorios (4.32), papelaria (4.19), pet_shop (4.19)
+-- beleza_saude: 4.14 score with 9,645 sales — high volume AND high satisfaction
+-- This makes beleza_saude the platform's strongest overall category
