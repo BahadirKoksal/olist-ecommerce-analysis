@@ -1,0 +1,37 @@
+-- ============================================================
+-- CASE 3: ORDER AND REVENUE TREND ANALYSIS
+-- How has the platform grown over time?
+-- ============================================================
+
+-- STEP 1: Monthly order count and revenue
+-- FORMAT_TIMESTAMP extracts year-month from a timestamp column
+SELECT
+  FORMAT_TIMESTAMP('%Y-%m', o.order_purchase_timestamp) AS order_month,
+  COUNT(DISTINCT o.order_id) AS total_orders,
+  SUM(p.payment_value) AS total_revenue
+FROM Olist.olist_orders_dataset AS o
+JOIN Olist.olist_order_payments_dataset AS p
+  ON o.order_id = p.order_id
+GROUP BY order_month
+ORDER BY order_month;
+-- Platform launched late 2016, grew rapidly through 2017
+-- Revenue roughly 10x from Jan 2017 to Nov 2017
+-- Growth stabilized in 2018 — plateau around 6,000–7,500 orders/month
+-- Dataset ends abruptly in Sep/Oct 2018 (incomplete months)
+
+-- STEP 2: AOV — Average Order Value per month
+-- AOV = total revenue / number of orders
+-- Measures how much customers spend per order on average
+SELECT
+  FORMAT_TIMESTAMP('%Y-%m', o.order_purchase_timestamp) AS order_month,
+  COUNT(DISTINCT o.order_id) AS total_orders,
+  SUM(p.payment_value) AS total_revenue,
+  SUM(p.payment_value) / COUNT(DISTINCT o.order_id) AS avg_order_value
+FROM Olist.olist_orders_dataset AS o
+JOIN Olist.olist_order_payments_dataset AS p
+  ON o.order_id = p.order_id
+GROUP BY order_month
+ORDER BY order_month;
+-- AOV declined from ~182 (2016) to ~147–160 (2017–2018)
+-- As the platform scaled, it attracted a broader, lower-budget audience
+-- This is a classic marketplace growth pattern
