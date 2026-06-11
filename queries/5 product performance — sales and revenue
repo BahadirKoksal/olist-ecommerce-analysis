@@ -1,0 +1,35 @@
+-- ============================================================
+-- CASE 2: PRODUCT PERFORMANCE ANALYSIS
+-- Which categories sell the most?
+-- Which categories generate the most revenue?
+-- ============================================================
+
+-- STEP 1: Sales count by product category
+SELECT
+  p.product_category_name,
+  COUNT(oi.product_id) AS total_sales
+FROM Olist.olist_order_items_dataset AS oi
+JOIN Olist.olist_products_dataset AS p
+  ON oi.product_id = p.product_id
+GROUP BY p.product_category_name
+ORDER BY total_sales DESC
+LIMIT 10;
+-- Top categories: cama_mesa_banho (11,115), beleza_saude (9,670), esporte_lazer (8,641)
+-- Platform is home & living heavy — not electronics-first like Amazon
+-- Beauty & health is strong: small, fast-moving, repeat-purchase products
+
+-- STEP 2: Revenue by product category
+SELECT
+  p.product_category_name,
+  SUM(oi.price) AS total_revenue,
+  COUNT(oi.product_id) AS total_sales
+FROM Olist.olist_order_items_dataset AS oi
+JOIN Olist.olist_products_dataset AS p
+  ON oi.product_id = p.product_id
+GROUP BY p.product_category_name
+ORDER BY total_revenue DESC
+LIMIT 10;
+-- beleza_saude leads revenue (1.26M) despite not being #1 in sales
+-- relogios_presentes: only 5,991 sales but 1.21M revenue — expensive products
+-- cama_mesa_banho: most sold but not highest revenue
+-- Key insight: high sales volume does NOT equal high revenue
