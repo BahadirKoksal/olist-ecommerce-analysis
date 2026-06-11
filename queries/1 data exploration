@@ -1,0 +1,67 @@
+-- ============================================================
+-- Olist E-Commerce Analysis
+-- BigQuery SQL Project
+-- ============================================================
+
+-- ============================================================
+-- 1. DATA EXPLORATION
+-- Preview all source tables and check row counts
+-- ============================================================
+
+-- Row counts across all tables
+SELECT COUNT(*) FROM Olist.olist_orders_dataset;
+SELECT COUNT(*) FROM Olist.olist_customers_dataset;
+SELECT COUNT(*) FROM Olist.olist_order_reviews_dataset;
+SELECT COUNT(*) FROM Olist.olist_order_payments_dataset;
+SELECT COUNT(*) FROM Olist.olist_order_items_dataset;
+SELECT COUNT(*) FROM Olist.olist_sellers_dataset;
+
+-- Preview orders table
+SELECT *
+FROM Olist.olist_orders_dataset
+LIMIT 10;
+
+-- Order status distribution
+SELECT
+  order_status,
+  COUNT(*) AS total_orders
+FROM Olist.olist_orders_dataset
+GROUP BY order_status
+ORDER BY total_orders;
+
+-- Preview reviews table
+SELECT *
+FROM Olist.olist_order_reviews_dataset;
+
+-- Review score distribution
+SELECT
+  review_score,
+  COUNT(*) AS total_reviews
+FROM Olist.olist_order_reviews_dataset
+GROUP BY review_score
+ORDER BY review_score;
+
+-- Preview products table
+SELECT *
+FROM Olist.olist_products_dataset;
+
+-- Top 10 product categories by product count
+SELECT
+  product_category_name,
+  COUNT(*) AS product_count
+FROM Olist.olist_products_dataset
+GROUP BY product_category_name
+ORDER BY product_count DESC
+LIMIT 10;
+
+-- Preview customers table
+SELECT *
+FROM Olist.olist_customers_dataset;
+
+-- Preview payments table
+SELECT *
+FROM Olist.olist_order_payments_dataset;
+
+-- Preview order items table
+SELECT *
+FROM Olist.olist_order_items_dataset;
