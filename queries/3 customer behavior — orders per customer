@@ -1,0 +1,26 @@
+-- ============================================================
+-- CASE 1: CUSTOMER BEHAVIOR ANALYSIS
+-- How many customers placed 1 order vs. multiple orders?
+-- ============================================================
+
+-- STEP 3: Order frequency distribution (subquery)
+-- Inner query: count orders per customer
+-- Outer query: count how many customers fall into each frequency bucket
+SELECT
+  orders_per_customer,
+  COUNT(*) AS customer_count
+FROM (
+  SELECT
+    c.customer_unique_id,
+    COUNT(o.order_id) AS orders_per_customer
+  FROM Olist.olist_orders_dataset AS o
+  JOIN Olist.olist_customers_dataset AS c
+    ON o.customer_id = c.customer_id
+  GROUP BY c.customer_unique_id
+)
+GROUP BY orders_per_customer
+ORDER BY orders_per_customer;
+-- 93,099 customers (96.9%) placed exactly 1 order
+-- Only a small group of customers ever returned to buy again
+-- This signals a retention problem: the platform acquires customers
+-- but struggles to bring them back
