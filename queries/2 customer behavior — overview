@@ -1,0 +1,27 @@
+-- ============================================================
+-- CASE 1: CUSTOMER BEHAVIOR ANALYSIS
+-- How many customers are on the platform?
+-- How often do they buy?
+-- ============================================================
+
+-- STEP 1: Unique customers and total orders on the platform
+SELECT
+  COUNT(DISTINCT c.customer_unique_id) AS total_customers,
+  COUNT(DISTINCT o.order_id) AS total_orders
+FROM Olist.olist_orders_dataset AS o
+JOIN Olist.olist_customers_dataset AS c
+  ON o.customer_id = c.customer_id;
+-- Total customers: 96,096 | Total orders: 99,441
+
+-- STEP 2: Average orders per customer
+-- Total orders / total unique customers
+SELECT
+  COUNT(DISTINCT c.customer_unique_id) AS total_customers,
+  COUNT(DISTINCT o.order_id) AS total_orders,
+  COUNT(DISTINCT o.order_id) / COUNT(DISTINCT c.customer_unique_id) AS avg_orders_per_customer
+FROM Olist.olist_orders_dataset AS o
+JOIN Olist.olist_customers_dataset AS c
+  ON o.customer_id = c.customer_id;
+-- avg_orders_per_customer ≈ 1.03
+-- Most customers place only one order — low repeat purchase rate
+-- The vast majority of Olist customers may have shopped only once
